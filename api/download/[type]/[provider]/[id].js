@@ -33,12 +33,23 @@ function getFilePath(type, provider, id) {
   return null;
 }
 
+const VALID_ID = /^[a-zA-Z0-9_-]+$/;
+const ALLOWED_PROVIDERS = ['cursor', 'claude-code', 'gemini', 'codex', 'agents', 'universal'];
+
 export default function handler(req, res) {
   try {
     const { type, provider, id } = req.query;
 
     if (type !== "skill" && type !== "command") {
       return res.status(400).json({ error: "Invalid type" });
+    }
+
+    if (!provider || !ALLOWED_PROVIDERS.includes(provider)) {
+      return res.status(400).json({ error: "Invalid provider" });
+    }
+
+    if (!id || !VALID_ID.test(id)) {
+      return res.status(400).json({ error: "Invalid file ID" });
     }
 
     const filePath = getFilePath(type, provider, id);
@@ -52,13 +63,13 @@ export default function handler(req, res) {
     }
 
     const content = readFileSync(filePath);
-    const fileName = basename(filePath);
+    const fileName = basename(filePath).replace(/[^a-zA-Z0-9._-]/g, '');
     res.setHeader("Content-Type", "application/octet-stream");
     res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
     res.send(content);
   } catch (error) {
     console.error("Error downloading file:", error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: "Internal server error" });
   }
 }
 

@@ -42,7 +42,7 @@ export default function handler(req, res) {
     res.status(200).json(commands);
   } catch (error) {
     console.error("Error in /api/commands:", error);
-    res.status(500).json({ error: error.message, stack: error.stack });
+    res.status(500).json({ error: "Internal server error" });
   }
 }
 

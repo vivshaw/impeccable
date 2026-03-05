@@ -3,6 +3,7 @@ import { basename, join, dirname } from "path";
 import { existsSync } from "fs";
 import { fileURLToPath } from "url";
 import { readPatterns, parseFrontmatter } from "../../scripts/lib/utils.js";
+import { isValidId, isAllowedProvider, isAllowedType, sanitizeFilename } from "./validation.js";
 
 // Get project root directory (works in both Node.js and Bun, including Vercel)
 const __filename = fileURLToPath(import.meta.url);
@@ -47,6 +48,10 @@ export async function getCommands() {
 
 // Get command/skill source content
 export async function getCommandSource(id) {
+	if (!isValidId(id)) {
+		return { error: "Invalid command ID", status: 400 };
+	}
+
 	const skillPath = join(PROJECT_ROOT, "source", "skills", id, "SKILL.md");
 
 	try {
@@ -87,8 +92,16 @@ export function getFilePath(type, provider, id) {
 
 // Handle individual file download
 export async function handleFileDownload(type, provider, id) {
-	if (type !== "skill" && type !== "command") {
+	if (!isAllowedType(type)) {
 		return new Response("Invalid type", { status: 400 });
+	}
+
+	if (!isAllowedProvider(provider)) {
+		return new Response("Invalid provider", { status: 400 });
+	}
+
+	if (!isValidId(id)) {
+		return new Response("Invalid file ID", { status: 400 });
 	}
 
 	const filePath = getFilePath(type, provider, id);
@@ -103,7 +116,7 @@ export async function handleFileDownload(type, provider, id) {
 		}
 
 		const content = await readFile(filePath);
-		const fileName = basename(filePath);
+		const fileName = sanitizeFilename(basename(filePath));
 		return new Response(content, {
 			headers: {
 				"Content-Type": "application/octet-stream",
@@ -128,6 +141,10 @@ export async function getPatterns() {
 
 // Handle bundle download
 export async function handleBundleDownload(provider) {
+	if (!isAllowedProvider(provider)) {
+		return new Response("Invalid provider", { status: 400 });
+	}
+
 	const distDir = join(PROJECT_ROOT, "dist");
 	const zipPath = join(distDir, `${provider}.zip`);
 
@@ -137,10 +154,11 @@ export async function handleBundleDownload(provider) {
 		}
 
 		const content = await readFile(zipPath);
+		const safeProvider = sanitizeFilename(provider);
 		return new Response(content, {
 			headers: {
 				"Content-Type": "application/zip",
-				"Content-Disposition": `attachment; filename="impeccable-style-${provider}.zip"`,
+				"Content-Disposition": `attachment; filename="impeccable-style-${safeProvider}.zip"`,
 			},
 		});
 	} catch (error) {

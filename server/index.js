@@ -20,42 +20,48 @@ const server = serve({
     // Static assets - all public subdirectories
     "/assets/*": async (req) => {
       const url = new URL(req.url);
+      if (url.pathname.includes('..')) return new Response("Bad Request", { status: 400 });
       const filePath = `./public${url.pathname}`;
       const assetFile = file(filePath);
       if (await assetFile.exists()) {
-        return new Response(assetFile);
+        return new Response(assetFile, {
+          headers: { "X-Content-Type-Options": "nosniff", "X-Frame-Options": "DENY" }
+        });
       }
       return new Response("Not Found", { status: 404 });
     },
     "/css/*": async (req) => {
       const url = new URL(req.url);
+      if (url.pathname.includes('..')) return new Response("Bad Request", { status: 400 });
       const filePath = `./public${url.pathname}`;
       const assetFile = file(filePath);
       if (await assetFile.exists()) {
         return new Response(assetFile, {
-          headers: { "Content-Type": "text/css" }
+          headers: { "Content-Type": "text/css", "X-Content-Type-Options": "nosniff", "X-Frame-Options": "DENY" }
         });
       }
       return new Response("Not Found", { status: 404 });
     },
     "/js/*": async (req) => {
       const url = new URL(req.url);
+      if (url.pathname.includes('..')) return new Response("Bad Request", { status: 400 });
       const filePath = `./public${url.pathname}`;
       const assetFile = file(filePath);
       if (await assetFile.exists()) {
         return new Response(assetFile, {
-          headers: { "Content-Type": "application/javascript" }
+          headers: { "Content-Type": "application/javascript", "X-Content-Type-Options": "nosniff", "X-Frame-Options": "DENY" }
         });
       }
       return new Response("Not Found", { status: 404 });
     },
     "/antipattern-examples/*": async (req) => {
       const url = new URL(req.url);
+      if (url.pathname.includes('..')) return new Response("Bad Request", { status: 400 });
       const filePath = `./public${url.pathname}`;
       const assetFile = file(filePath);
       if (await assetFile.exists()) {
         return new Response(assetFile, {
-          headers: { "Content-Type": "text/html" }
+          headers: { "Content-Type": "text/html", "X-Content-Type-Options": "nosniff", "X-Frame-Options": "DENY" }
         });
       }
       return new Response("Not Found", { status: 404 });
@@ -88,11 +94,14 @@ const server = serve({
     // API: Get command source content
     "/api/command-source/:id": async (req) => {
       const { id } = req.params;
-      const content = await getCommandSource(id);
-      if (!content) {
+      const result = await getCommandSource(id);
+      if (result && result.error) {
+        return Response.json({ error: result.error }, { status: result.status });
+      }
+      if (!result) {
         return Response.json({ error: "Command not found" }, { status: 404 });
       }
-      return Response.json({ content });
+      return Response.json({ content: result });
     },
 
     // API: Download individual file
@@ -111,6 +120,9 @@ const server = serve({
   // Serve root-level static files (og-image.png, favicon, robots.txt, etc.)
   fetch(req) {
     const url = new URL(req.url);
+    if (url.pathname.includes('..')) {
+      return new Response("Bad Request", { status: 400 });
+    }
     const filePath = `./public${url.pathname}`;
     const staticFile = file(filePath);
     if (staticFile.size > 0) {
