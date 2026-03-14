@@ -9,39 +9,16 @@ This repository uses a **feature-rich source format** that transforms into provi
 ### Why This Approach?
 
 Different providers have different capabilities:
-- **Cursor**: No frontmatter or argument support
-- **Claude Code, Gemini, Codex**: Full support for metadata and arguments
+- **Claude Code, OpenCode**: Full metadata — args, user-invokable, allowed-tools, license, compatibility
+- **Codex, Agents**: Args converted to `argument-hint` format
+- **Gemini**: Minimal frontmatter, `{{arg}}` placeholders become `{{args}}`
+- **Cursor, Kiro, Pi**: Basic frontmatter (name, description, license/compatibility)
 
 By maintaining rich source files, we preserve maximum functionality where supported while still providing working (if simpler) versions for all providers.
 
 ## Source Format
 
-### Commands (`source/commands/*.md`)
-
-```yaml
----
-name: command-name
-description: What this command does
-args:
-  - name: argname
-    description: Argument description
-    required: false
----
-
-Your command prompt here with {{argname}} placeholders...
-```
-
-**Frontmatter fields**:
-- `name` (required): Command identifier
-- `description` (required): What the command does
-- `args` (optional): Array of argument objects
-  - `name`: Argument identifier
-  - `description`: What it's for
-  - `required`: Boolean (defaults to false)
-
-**Body**: The actual prompt. Use `{{argname}}` for argument placeholders (automatically transformed to provider-specific syntax).
-
-### Skills (`source/skills/*.md`)
+### Skills (`source/skills/{name}/SKILL.md`)
 
 ```yaml
 ---
@@ -57,6 +34,11 @@ Your skill instructions here...
 **Frontmatter fields** (based on [Agent Skills spec](https://agentskills.io/specification)):
 - `name` (required): Skill identifier (1-64 chars, lowercase/numbers/hyphens)
 - `description` (required): What the skill provides (1-1024 chars)
+- `user-invokable` (optional): Boolean — if `true`, the skill can be invoked as a slash command
+- `args` (optional): Array of argument objects (for user-invokable skills)
+  - `name`: Argument identifier
+  - `description`: What it's for
+  - `required`: Boolean (defaults to false)
 - `license` (optional): License/attribution info
 - `compatibility` (optional): Environment requirements (1-500 chars)
 - `metadata` (optional): Arbitrary key-value pairs
@@ -86,72 +68,66 @@ bun run rebuild
 ### What Gets Generated
 
 ```
-source/                  → dist/
-  commands/*.md            cursor/commands/*.md         (body only)
-  skills/*.md              cursor/skills/*/SKILL.md     (Agent Skills standard)
-
-                           claude-code/commands/*.md    (full frontmatter)
-                           claude-code/skills/*/SKILL.md
-
-                           gemini/commands/*.toml       (TOML format)
-                           gemini/GEMINI*.md            (modular)
-
-                           codex/prompts/*.md           (custom prompt format)
-                           codex/skills/*/SKILL.md      (Agent Skills standard)
+source/                          → dist/
+  skills/{name}/SKILL.md           cursor/.cursor/skills/{name}/SKILL.md
+                                   claude-code/.claude/skills/{name}/SKILL.md
+                                   gemini/.gemini/skills/{name}/SKILL.md
+                                   codex/.codex/skills/{name}/SKILL.md
+                                   agents/.agents/skills/{name}/SKILL.md
+                                   kiro/.kiro/skills/{name}/SKILL.md
+                                   opencode/.opencode/skills/{name}/SKILL.md
+                                   pi/.pi/skills/{name}/SKILL.md
 ```
 
 ## Provider Transformations
 
-### Cursor (Agent Skills Standard)
-- Commands → Body only → `dist/cursor/.cursor/commands/*.md` (no frontmatter support)
-- Skills → Agent Skills standard → `dist/cursor/.cursor/skills/{name}/SKILL.md`
-  - Full YAML frontmatter support
-  - Reference files in skill subdirectories
+All providers output skills to `dist/{provider}/.{config}/skills/{name}/SKILL.md` with reference files in subdirectories. They differ in frontmatter fields and argument handling.
+
+### Cursor
+- Output: `dist/cursor/.cursor/skills/{name}/SKILL.md`
+- Frontmatter: name, description, license
 - **Note**: Agent Skills require Cursor nightly channel
 
 ### Claude Code (Full Featured)
-- Keeps full YAML frontmatter + body
-- Commands → `dist/claude-code/commands/*.md`
-- Skills → `dist/claude-code/skills/{name}/SKILL.md`
+- Output: `dist/claude-code/.claude/skills/{name}/SKILL.md`
+- Frontmatter: name, description, user-invokable, args, license, compatibility, metadata, allowed-tools
+- Preserves `{{arg}}` placeholders in body
 
-### Gemini CLI (Full Featured)
-- Commands converted to TOML format → `dist/gemini/commands/*.toml`
-  - `description` and `prompt` keys
-  - Arguments converted to `{{args}}` (Gemini uses single args string)
-- Skills → Modular `GEMINI.{name}.md` files
-- Main `GEMINI.md` imports skill files using `@./GEMINI.{name}.md` syntax
-  - Uses Gemini's native import feature for modular context files
+### OpenCode (Full Featured)
+- Output: `dist/opencode/.opencode/skills/{name}/SKILL.md`
+- Frontmatter: name, description, user-invokable, args, license, compatibility, metadata, allowed-tools
+- Same format as Claude Code
 
-### Codex CLI (Full Featured)
-- Commands → Custom prompts with `argument-hint` → `dist/codex/.codex/prompts/*.md`
-  - Frontmatter uses `description` and `argument-hint` (not `args` array)
-  - Placeholders transformed from `{{argname}}` to `$ARGNAME` (uppercase)
-  - Invoked as `/prompts:<name>`
-- Skills → Agent Skills standard → `dist/codex/.codex/skills/{name}/SKILL.md`
-  - Uses same SKILL.md format as Claude Code
-  - Reference files in subdirectories
+### Gemini CLI
+- Output: `dist/gemini/.gemini/skills/{name}/SKILL.md`
+- Frontmatter: name, description
+- For user-invokable skills: remaining `{{arg}}` placeholders become `{{args}}`
 
-### Pi (Agent Skills Standard)
-- Skills → Agent Skills standard → `dist/pi/.pi/skills/{name}/SKILL.md`
-  - Standard frontmatter: name, description, license, compatibility, metadata
-  - Reference files in skill subdirectories
+### Codex CLI
+- Output: `dist/codex/.codex/skills/{name}/SKILL.md`
+- Frontmatter: name, description, argument-hint, license
+- For user-invokable skills: `{{argname}}` → `$ARGNAME` (uppercase)
+
+### Agents (VS Code Copilot, Antigravity)
+- Output: `dist/agents/.agents/skills/{name}/SKILL.md`
+- Frontmatter: name, description, user-invokable, argument-hint
+- Args converted to `argument-hint` format (e.g., `<target> [FORMAT=<value>]`)
+
+### Kiro
+- Output: `dist/kiro/.kiro/skills/{name}/SKILL.md`
+- Frontmatter: name, description, license, compatibility, metadata
+
+### Pi
+- Output: `dist/pi/.pi/skills/{name}/SKILL.md`
+- Frontmatter: name, description, license, compatibility, metadata
 
 ## Adding New Content
 
 ### 1. Create Source File
 
-**For a command**:
 ```bash
-# Create source/commands/mycommand.md
-touch source/commands/mycommand.md
-```
-
-Add frontmatter and content following the format above.
-
-**For a skill**:
-```bash
-# Create source/skills/myskill.md
-touch source/skills/myskill.md
+mkdir source/skills/myskill
+touch source/skills/myskill/SKILL.md
 ```
 
 Add frontmatter and content following the format above.
@@ -162,7 +138,7 @@ Add frontmatter and content following the format above.
 bun run build
 ```
 
-This generates all 4 provider formats automatically.
+This generates all 8 provider formats automatically.
 
 ### 3. Test
 
@@ -170,46 +146,45 @@ Test with your provider of choice to ensure it works correctly. Remember that Cu
 
 ### 4. Commit
 
-Commit both source and dist files:
+Commit source files:
 ```bash
-git add source/ dist/
-git commit -m "Add [command/skill name]"
+git add source/
+git commit -m "Add [skill name]"
 ```
-
-**Important**: The `dist/` directory is committed intentionally so end users can use files without building.
 
 ## Build System Details
 
-The build system (`scripts/build.js`) is a single ~170-line Node.js script with:
-- Custom YAML frontmatter parser (no dependencies)
-- Provider-specific transformation functions
-- Automatic directory management
-- Zero external dependencies (pure Node.js)
+The build system uses a modular architecture under `scripts/`:
+
+- `build.js` — Main orchestrator
+- `lib/utils.js` — Shared utilities (frontmatter parsing, file I/O, placeholder replacement)
+- `lib/zip.js` — ZIP bundle generation
+- `lib/transformers/*.js` — One file per provider (cursor, claude-code, gemini, codex, agents, kiro, opencode, pi)
 
 ### Key Functions
 
 - `parseFrontmatter()`: Extracts YAML frontmatter and body
-- `readSourceFiles()`: Recursively reads source files
-- `transformCursor()`: Strips frontmatter for Cursor
-- `transformClaudeCode()`: Keeps full format
-- `transformGemini()`: Converts to TOML + modular skills
-- `transformCodex()`: Full format + modular skills
+- `readSourceFiles()`: Reads all skill directories from `source/skills/`
+- `replacePlaceholders()`: Substitutes `{{model}}`, `{{config_file}}`, etc. per provider
+- `transformCursor()`: Basic frontmatter (name, description, license)
+- `transformClaudeCode()`: Full metadata with args and allowed-tools
+- `transformGemini()`: Minimal frontmatter, `{{arg}}` → `{{args}}`
+- `transformCodex()`: Args → argument-hint, `{{arg}}` → `$ARGNAME`
+- `transformAgents()`: Args → argument-hint, user-invokable flag
+- `transformKiro()`: Basic frontmatter with license/compatibility/metadata
+- `transformOpenCode()`: Full metadata (same as Claude Code)
+- `transformPi()`: Basic frontmatter with license/compatibility/metadata
 
 ## Best Practices
-
-### Command Writing
-
-1. **Clear descriptions**: Make purpose obvious
-2. **Meaningful argument names**: Use descriptive names
-3. **Flexible prompts**: Write prompts that work even without argument substitution (for Cursor compatibility)
-4. **Test across providers**: Verify it works in multiple contexts
 
 ### Skill Writing
 
 1. **Focused scope**: One clear domain per skill
-2. **Clear instructions**: LLM should understand exactly what to do
-3. **Include examples**: Where they clarify intent
-4. **State constraints**: What NOT to do as clearly as what to do
+2. **Clear descriptions**: Make purpose obvious
+3. **Clear instructions**: LLM should understand exactly what to do
+4. **Include examples**: Where they clarify intent
+5. **State constraints**: What NOT to do as clearly as what to do
+6. **Test across providers**: Verify it works in multiple contexts
 
 ## Reference Documentation
 
@@ -229,12 +204,15 @@ The build system (`scripts/build.js`) is a single ~170-line Node.js script with:
 
 ```
 impeccable/
-├── source/              # Edit these! Source of truth
-│   ├── commands/        # Command definitions
-│   │   └── normalize.md
-│   └── skills/          # Skill definitions
-│       └── frontend-design.md
-├── dist/                # Generated (committed for users)
+├── source/                          # Edit these! Source of truth
+│   └── skills/                      # Skill definitions
+│       ├── frontend-design/
+│       │   ├── SKILL.md
+│       │   └── reference/*.md       # Domain-specific references
+│       ├── audit/SKILL.md
+│       ├── polish/SKILL.md
+│       └── ...
+├── dist/                            # Generated output (gitignored)
 │   ├── cursor/
 │   ├── claude-code/
 │   ├── gemini/
@@ -244,10 +222,23 @@ impeccable/
 │   ├── opencode/
 │   └── pi/
 ├── scripts/
-│   └── build.js         # Build system (~170 lines, zero deps)
-├── package.json         # ESM project config
-├── README.md            # User documentation
-├── DEVELOP.md           # This file
+│   ├── build.js                     # Main orchestrator
+│   └── lib/
+│       ├── utils.js                 # Shared utilities
+│       ├── zip.js                   # ZIP generation
+│       └── transformers/            # One file per provider
+│           ├── cursor.js
+│           ├── claude-code.js
+│           ├── gemini.js
+│           ├── codex.js
+│           ├── agents.js
+│           ├── kiro.js
+│           ├── opencode.js
+│           └── pi.js
+├── tests/                           # Bun test suite
+├── package.json                     # ESM project config
+├── README.md                        # User documentation
+├── DEVELOP.md                       # This file
 └── .gitignore
 ```
 
@@ -259,9 +250,9 @@ impeccable/
 - Verify colons have spaces after them (`key: value`)
 
 ### Output doesn't match expectations
-- Check the transformer function for your provider in `scripts/build.js`
+- Check the transformer function for your provider in `scripts/lib/transformers/`
 - Verify source file has correct frontmatter structure
-- Run `npm run rebuild` to ensure clean build
+- Run `bun run rebuild` to ensure clean build
 
 ### Provider doesn't recognize the files
 - Check installation path for your provider
