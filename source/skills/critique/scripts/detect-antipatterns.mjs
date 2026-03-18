@@ -18,120 +18,14 @@
 
 import fs from 'fs';
 import path from 'path';
+import {
+  SAFE_TAGS, OVERUSED_FONTS, GENERIC_FONTS, ANTIPATTERNS,
+  isNeutralColor, parseRgb, relativeLuminance, contrastRatio,
+  hasChroma, getHue, colorToHex,
+  checkBorders, checkColors, isCardLikeFromProps,
+} from './detect-antipatterns-core.mjs';
 
-// ---------------------------------------------------------------------------
-// Shared constants
-// ---------------------------------------------------------------------------
-
-const SAFE_TAGS = new Set([
-  'blockquote', 'nav', 'a', 'input', 'textarea', 'select',
-  'pre', 'code', 'span', 'th', 'td', 'tr', 'li', 'label',
-  'button', 'hr', 'html', 'head', 'body', 'script', 'style',
-  'link', 'meta', 'title', 'br', 'img', 'svg', 'path', 'circle',
-  'rect', 'line', 'polyline', 'polygon', 'g', 'defs', 'use',
-]);
-
-const OVERUSED_FONTS = new Set([
-  'inter', 'roboto', 'open sans', 'lato', 'montserrat', 'arial', 'helvetica',
-]);
-
-const GENERIC_FONTS = new Set([
-  'serif', 'sans-serif', 'monospace', 'cursive', 'fantasy',
-  'system-ui', 'ui-serif', 'ui-sans-serif', 'ui-monospace', 'ui-rounded',
-  '-apple-system', 'blinkmacsystemfont', 'segoe ui',
-  'inherit', 'initial', 'unset', 'revert',
-]);
-
-// ---------------------------------------------------------------------------
-// Anti-pattern definitions
-// ---------------------------------------------------------------------------
-
-const ANTIPATTERNS = [
-  {
-    id: 'side-tab',
-    name: 'Side-tab accent border',
-    description:
-      'Thick colored border on one side of a card — the most recognizable tell of AI-generated UIs. Use a subtler accent or remove it entirely.',
-  },
-  {
-    id: 'border-accent-on-rounded',
-    name: 'Border accent on rounded element',
-    description:
-      'Thick accent border on a rounded card — the border clashes with the rounded corners. Remove the border or the border-radius.',
-  },
-  {
-    id: 'overused-font',
-    name: 'Overused font',
-    description:
-      'Inter, Roboto, Open Sans, Lato, Montserrat, and Arial are used on millions of sites. Choose a distinctive font that gives your interface personality.',
-  },
-  {
-    id: 'single-font',
-    name: 'Single font for everything',
-    description:
-      'Only one font family is used for the entire page. Pair a distinctive display font with a refined body font to create typographic hierarchy.',
-  },
-  {
-    id: 'flat-type-hierarchy',
-    name: 'Flat type hierarchy',
-    description:
-      'Font sizes are too close together — no clear visual hierarchy. Use fewer sizes with more contrast (aim for at least a 1.25 ratio between steps).',
-  },
-  // -------------------------------------------------------------------------
-  // Color & contrast anti-patterns
-  // -------------------------------------------------------------------------
-  {
-    id: 'pure-black-white',
-    name: 'Pure black background',
-    description:
-      'Pure #000000 as a background color looks harsh and unnatural. Tint it slightly toward your brand hue (e.g., oklch(12% 0.01 250)) for a more refined feel.',
-  },
-  {
-    id: 'gray-on-color',
-    name: 'Gray text on colored background',
-    description:
-      'Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.',
-  },
-  {
-    id: 'low-contrast',
-    name: 'Low contrast text',
-    description:
-      'Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background.',
-  },
-  {
-    id: 'gradient-text',
-    name: 'Gradient text',
-    description:
-      'Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.',
-  },
-  {
-    id: 'ai-color-palette',
-    name: 'AI color palette',
-    description:
-      'Purple/violet gradients and cyan-on-dark are the most recognizable tells of AI-generated UIs. Choose a distinctive, intentional palette.',
-  },
-  // -------------------------------------------------------------------------
-  // Layout & space anti-patterns
-  // -------------------------------------------------------------------------
-  {
-    id: 'nested-cards',
-    name: 'Nested cards',
-    description:
-      'Cards inside cards create visual noise and excessive depth. Flatten the hierarchy — use spacing, typography, and dividers instead of nesting containers.',
-  },
-  {
-    id: 'monotonous-spacing',
-    name: 'Monotonous spacing',
-    description:
-      'The same spacing value used everywhere — no rhythm, no variation. Use tight groupings for related items and generous separations between sections.',
-  },
-  {
-    id: 'everything-centered',
-    name: 'Everything centered',
-    description:
-      'Every text element is center-aligned. Left-aligned text with asymmetric layouts feels more designed. Center only hero sections and CTAs.',
-  },
-];
+// ANTIPATTERNS, constants, and color utilities imported from core
 
 /** Check if content looks like a full page (not a component/partial) */
 function isFullPage(content) {
@@ -149,84 +43,7 @@ function finding(id, filePath, snippet, line = 0) {
   return { antipattern: id, name: ap.name, description: ap.description, file: filePath, line, snippet };
 }
 
-// ---------------------------------------------------------------------------
-// Computed-style detection (shared by jsdom + Puppeteer + browser)
-// ---------------------------------------------------------------------------
-
-/**
- * Check if an RGB color string is neutral (gray/structural).
- */
-function isNeutralColor(color) {
-  if (!color || color === 'transparent') return true;
-  const m = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-  if (!m) return true;
-  const [r, g, b] = [+m[1], +m[2], +m[3]];
-  return (Math.max(r, g, b) - Math.min(r, g, b)) < 30;
-}
-
-/**
- * Parse an RGB/RGBA color string into { r, g, b, a } (0-255 for rgb, 0-1 for a).
- * Returns null if unparseable.
- */
-function parseRgb(color) {
-  if (!color || color === 'transparent') return null;
-  const m = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
-  if (!m) return null;
-  return { r: +m[1], g: +m[2], b: +m[3], a: m[4] !== undefined ? +m[4] : 1 };
-}
-
-/**
- * Compute relative luminance (WCAG 2.x formula).
- * Input: { r, g, b } with values 0-255.
- */
-function relativeLuminance({ r, g, b }) {
-  const [rs, gs, bs] = [r / 255, g / 255, b / 255].map(c =>
-    c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
-  );
-  return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
-}
-
-/**
- * Compute WCAG contrast ratio between two colors.
- * Returns a number >= 1.
- */
-function contrastRatio(c1, c2) {
-  const l1 = relativeLuminance(c1);
-  const l2 = relativeLuminance(c2);
-  const lighter = Math.max(l1, l2);
-  const darker = Math.min(l1, l2);
-  return (lighter + 0.05) / (darker + 0.05);
-}
-
-/**
- * Check if a color has meaningful chroma (is "colored" vs gray/neutral).
- * Uses simple RGB saturation check.
- */
-function hasChroma(c, threshold = 30) {
-  if (!c) return false;
-  return (Math.max(c.r, c.g, c.b) - Math.min(c.r, c.g, c.b)) >= threshold;
-}
-
-/**
- * Get the approximate hue (0-360) from RGB.
- */
-function getHue(c) {
-  if (!c) return 0;
-  const r = c.r / 255, g = c.g / 255, b = c.b / 255;
-  const max = Math.max(r, g, b), min = Math.min(r, g, b);
-  if (max === min) return 0;
-  const d = max - min;
-  let h;
-  if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
-  else if (max === g) h = ((b - r) / d + 2) / 6;
-  else h = ((r - g) / d + 4) / 6;
-  return Math.round(h * 360);
-}
-
-function colorToHex(c) {
-  if (!c) return '?';
-  return '#' + [c.r, c.g, c.b].map(v => v.toString(16).padStart(2, '0')).join('');
-}
+// Color utilities imported from core
 
 /**
  * Resolve the effective background color for an element by walking up ancestors.
@@ -266,158 +83,38 @@ function resolveBackground(el, window) {
 }
 
 /**
- * Analyze an element's colors for anti-patterns.
- * Needs the element, its computed style, AND access to the window for ancestor bg resolution.
+ * Extract color data from element/style and delegate to core.checkColors.
+ * Keeps jsdom-specific resolveBackground here.
  */
 function checkElementColors(el, style, tag, window) {
-  if (SAFE_TAGS.has(tag)) return [];
-  const findings = [];
-
-  const textColor = parseRgb(style.color);
-  const bgColor = parseRgb(style.backgroundColor);
-  const fontSize = parseFloat(style.fontSize) || 16;
-  const fontWeight = parseInt(style.fontWeight) || 400;
-
-  // Skip non-text elements (no text content)
   const hasText = el.textContent?.trim().length > 0;
   const hasDirectText = hasText && [...el.childNodes].some(n => n.nodeType === 3 && n.textContent.trim());
 
-  // Pure black background — only flag #000 as background (not text, not white)
-  if (bgColor && bgColor.a > 0.1 && bgColor.r === 0 && bgColor.g === 0 && bgColor.b === 0) {
-    findings.push({ id: 'pure-black-white', snippet: '#000000 background' });
-  }
-
-  if (hasDirectText && textColor) {
-    // --- Gray text on colored background ---
-    const effectiveBg = resolveBackground(el, window);
-    // Gray = low chroma AND mid-range luminance (not near-white or near-black)
-    const textLum = relativeLuminance(textColor);
-    const isGray = !hasChroma(textColor, 20) && textLum > 0.05 && textLum < 0.85;
-    if (isGray && hasChroma(effectiveBg, 40)) {
-      findings.push({
-        id: 'gray-on-color',
-        snippet: `text ${colorToHex(textColor)} on bg ${colorToHex(effectiveBg)}`,
-      });
-    }
-
-    // --- Low contrast (WCAG AA) ---
-    {
-      const ratio = contrastRatio(textColor, effectiveBg);
-      // jsdom may return fontSize in non-px units — also check tag-based heuristic
-      const isHeading = ['h1', 'h2', 'h3'].includes(tag);
-      const isLargeText = fontSize >= 18 || (fontSize >= 14 && fontWeight >= 700) || isHeading;
-      const threshold = isLargeText ? 3.0 : 4.5;
-      if (ratio < threshold) {
-        findings.push({
-          id: 'low-contrast',
-          snippet: `${ratio.toFixed(1)}:1 (need ${threshold}:1) — text ${colorToHex(textColor)} on ${colorToHex(effectiveBg)}`,
-        });
-      }
-    }
-  }
-
-  // --- Gradient text ---
-  const bgClip = style.webkitBackgroundClip || style.backgroundClip || '';
-  const bgImage = style.backgroundImage || '';
-  if (bgClip === 'text' && bgImage.includes('gradient')) {
-    findings.push({ id: 'gradient-text', snippet: 'background-clip: text + gradient' });
-  }
-
-  // --- AI color palette: purple/violet accent ---
-  // Only flag vivid purple/violet as text color or background on accent-like elements
-  if (hasDirectText && textColor && hasChroma(textColor, 50)) {
-    const hue = getHue(textColor);
-    // Purple/violet range: roughly 260-310
-    if (hue >= 260 && hue <= 310 && relativeLuminance(textColor) < 0.3) {
-      // Check if it's used on a heading or prominent text
-      if (['h1', 'h2', 'h3'].includes(tag) || fontSize >= 20) {
-        findings.push({ id: 'ai-color-palette', snippet: `Purple/violet text (${colorToHex(textColor)}) on heading` });
-      }
-    }
-  }
-
-  // --- Tailwind class-based color checks ---
-  const classList = el.getAttribute?.('class') || el.className || '';
-  if (classList) {
-    const TW_GRAY_FAMILIES = /\btext-(?:gray|slate|zinc|neutral|stone)-\d+\b/;
-    const TW_COLORED_BG = /\bbg-(?:red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-\d+\b/;
-
-    // Only flag bg-black (pure black background) — text colors are fine
-    if (/\bbg-black\b/.test(classList)) {
-      findings.push({ id: 'pure-black-white', snippet: 'bg-black' });
-    }
-
-    // Tailwind gray text on colored background
-    const grayMatch = classList.match(TW_GRAY_FAMILIES);
-    const coloredBgMatch = classList.match(TW_COLORED_BG);
-    if (grayMatch && coloredBgMatch) {
-      findings.push({ id: 'gray-on-color', snippet: `${grayMatch[0]} on ${coloredBgMatch[0]}` });
-    }
-
-    // Tailwind gradient text
-    if (/\bbg-clip-text\b/.test(classList) && /\bbg-gradient-to-/.test(classList)) {
-      findings.push({ id: 'gradient-text', snippet: 'bg-clip-text + bg-gradient-to (Tailwind)' });
-    }
-
-    // Tailwind AI palette: purple/violet text on headings
-    const purpleText = classList.match(/\btext-(?:purple|violet|indigo)-\d+\b/);
-    if (purpleText && (['h1', 'h2', 'h3'].includes(tag) || /\btext-(?:[2-9]xl|[3-9]xl)\b/.test(classList))) {
-      findings.push({ id: 'ai-color-palette', snippet: `${purpleText[0]} on heading` });
-    }
-
-    // Tailwind AI palette: purple/violet gradient
-    if (/\bfrom-(?:purple|violet|indigo)-\d+\b/.test(classList) && /\bto-(?:purple|violet|indigo|blue|cyan|pink|fuchsia)-\d+\b/.test(classList)) {
-      findings.push({ id: 'ai-color-palette', snippet: 'Purple/violet gradient (Tailwind)' });
-    }
-  }
-
-  return findings;
+  return checkColors({
+    tag,
+    textColor: parseRgb(style.color),
+    bgColor: parseRgb(style.backgroundColor),
+    effectiveBg: resolveBackground(el, window),
+    fontSize: parseFloat(style.fontSize) || 16,
+    fontWeight: parseInt(style.fontWeight) || 400,
+    hasDirectText,
+    bgClip: style.webkitBackgroundClip || style.backgroundClip || '',
+    bgImage: style.backgroundImage || '',
+    classList: el.getAttribute?.('class') || el.className || '',
+  });
 }
 
 /**
- * Analyze a single element's computed styles for border anti-patterns.
- * Returns array of { id, snippet } findings.
+ * Extract border data from computed style and delegate to core.checkBorders.
  */
 function checkElementBorders(tag, style) {
-  if (SAFE_TAGS.has(tag)) return [];
-  const findings = [];
-
   const sides = ['Top', 'Right', 'Bottom', 'Left'];
-  const widths = {};
-  const colors = {};
+  const widths = {}, colors = {};
   for (const s of sides) {
     widths[s] = parseFloat(style[`border${s}Width`]) || 0;
     colors[s] = style[`border${s}Color`] || '';
   }
-  const radius = parseFloat(style.borderRadius) || 0;
-
-  for (const side of sides) {
-    const w = widths[side];
-    if (w < 1) continue;
-    if (isNeutralColor(colors[side])) continue;
-
-    const otherSides = sides.filter(s => s !== side);
-    const maxOther = Math.max(...otherSides.map(s => widths[s]));
-    const isAccent = w >= 2 && (maxOther <= 1 || w >= maxOther * 2);
-    if (!isAccent) continue;
-
-    const sideName = side.toLowerCase();
-    const isSide = side === 'Left' || side === 'Right';
-
-    if (isSide) {
-      if (radius > 0) {
-        findings.push({ id: 'side-tab', snippet: `border-${sideName}: ${w}px + border-radius: ${radius}px` });
-      } else if (w >= 3) {
-        findings.push({ id: 'side-tab', snippet: `border-${sideName}: ${w}px` });
-      }
-    } else {
-      if (radius > 0 && w >= 2) {
-        findings.push({ id: 'border-accent-on-rounded', snippet: `border-${sideName}: ${w}px + border-radius: ${radius}px` });
-      }
-    }
-  }
-
-  return findings;
+  return checkBorders(tag, widths, colors, parseFloat(style.borderRadius) || 0);
 }
 
 /**
@@ -539,47 +236,27 @@ function checkPageTypography(document, window) {
 }
 
 /**
- * Check if an element looks like a "card" (has shadow, border-radius, and background).
+ * Check if an element looks like a "card". Extracts signals from computed
+ * styles, raw inline style (jsdom workaround), and Tailwind classes,
+ * then delegates to core.isCardLikeFromProps.
  */
 function isCardLike(el, window) {
-  const style = window.getComputedStyle(el);
   const tag = el.tagName.toLowerCase();
+  if (SAFE_TAGS.has(tag) || ['input', 'select', 'textarea', 'img', 'video', 'canvas', 'picture'].includes(tag)) return false;
 
-  // Skip non-visual elements
-  if (SAFE_TAGS.has(tag)) return false;
-  // Skip form elements (inputs, selects, textareas have shadow/rounded)
-  if (['input', 'select', 'textarea'].includes(tag)) return false;
-  // Skip images, media
-  if (['img', 'video', 'canvas', 'picture'].includes(tag)) return false;
-
-  const shadow = style.boxShadow || '';
-  const hasShadow = shadow && shadow !== 'none';
-  const radius = parseFloat(style.borderRadius) || 0;
-  const hasRadius = radius > 0;
-
-  // Also check raw inline style (jsdom doesn't resolve shorthand properties reliably)
+  const style = window.getComputedStyle(el);
   const rawStyle = el.getAttribute?.('style') || '';
-  const rawShadow = /box-shadow/i.test(rawStyle);
-  const rawRadius = /border-radius/i.test(rawStyle);
-  const rawBg = /background(?:-color)?\s*:\s*(?!transparent)/i.test(rawStyle);
-
-  // Also check Tailwind classes for card indicators
   const cls = el.getAttribute?.('class') || '';
-  const twShadow = /\bshadow(?:-sm|-md|-lg|-xl|-2xl)?\b/.test(cls);
-  const twRounded = /\brounded(?:-sm|-md|-lg|-xl|-2xl|-full)?\b/.test(cls);
-  const twBg = /\bbg-(?:white|gray-\d+|slate-\d+)\b/.test(cls);
-  const twBorder = /\bborder\b/.test(cls);
 
-  // A "card" needs shadow (or border) AND at least one of: rounded, bg
-  const hasShadowAny = hasShadow || twShadow || rawShadow;
-  const hasBorderAny = twBorder;
-  const hasRadiusAny = hasRadius || twRounded || rawRadius;
-  const hasBgAny = rawBg || twBg;
+  const hasShadow = (style.boxShadow && style.boxShadow !== 'none') ||
+    /\bshadow(?:-sm|-md|-lg|-xl|-2xl)?\b/.test(cls) || /box-shadow/i.test(rawStyle);
+  const hasBorder = /\bborder\b/.test(cls);
+  const hasRadius = (parseFloat(style.borderRadius) || 0) > 0 ||
+    /\brounded(?:-sm|-md|-lg|-xl|-2xl|-full)?\b/.test(cls) || /border-radius/i.test(rawStyle);
+  const hasBg = /\bbg-(?:white|gray-\d+|slate-\d+)\b/.test(cls) ||
+    /background(?:-color)?\s*:\s*(?!transparent)/i.test(rawStyle);
 
-  // Must have shadow or border (the key card indicator)
-  if (!hasShadowAny && !hasBorderAny) return false;
-  // Plus at least one of: rounded, background
-  return hasRadiusAny || hasBgAny;
+  return isCardLikeFromProps(hasShadow, hasBorder, hasRadius, hasBg);
 }
 
 /**
