@@ -322,13 +322,6 @@ async function build() {
   // Build CSS with Tailwind CLI (handles @theme directive)
   buildTailwindCSS();
 
-  // Generate browser anti-pattern detector from core module
-  try {
-    execSync('node scripts/build-browser-detector.js', { cwd: ROOT_DIR, stdio: 'inherit' });
-  } catch (error) {
-    console.error('Failed to build browser detector:', error.message);
-  }
-
   // Bundle HTML, JS, and compiled CSS with Bun
   await buildStaticSite();
 
@@ -394,6 +387,13 @@ async function build() {
   copyDirSync(skillsSrc, skillsDest);
 
   console.log(`📋 Synced to .claude/: skills`);
+
+  // Generate browser anti-pattern detector (after skill sync so it doesn't get overwritten)
+  try {
+    execSync('node scripts/build-browser-detector.js', { cwd: ROOT_DIR, stdio: 'inherit' });
+  } catch (error) {
+    console.error('Failed to build browser detector:', error.message);
+  }
 
   console.log('\n✨ Build complete!');
 }

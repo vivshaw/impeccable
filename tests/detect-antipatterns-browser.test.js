@@ -38,8 +38,13 @@ describeIf('browser script parity with CLI', () => {
         let filePath;
         if (req.url.startsWith('/fixtures/')) {
           filePath = path.join(${JSON.stringify(path.join(import.meta.dir))}, req.url);
-        } else if (req.url.startsWith('/.claude/')) {
-          filePath = path.join(${JSON.stringify(path.join(import.meta.dir, '..'))}, req.url);
+        } else if (req.url.startsWith('/js/')) {
+          // Check public/js/ first, then built artifacts
+          const basename = req.url.split('/').pop();
+          filePath = path.join(${JSON.stringify(path.join(import.meta.dir, '..', 'public'))}, req.url);
+          if (!fs.existsSync(filePath)) {
+            filePath = path.join(${JSON.stringify(path.join(import.meta.dir, '..', '.claude', 'skills', 'critique', 'scripts'))}, basename);
+          }
         } else {
           res.writeHead(404); res.end(); return;
         }
