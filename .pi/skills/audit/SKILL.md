@@ -1,11 +1,11 @@
 ---
 name: audit
-description: Perform comprehensive audit of interface quality across accessibility, performance, theming, and responsive design. Generates detailed report of issues with severity ratings and recommendations.
+description: Perform a comprehensive audit of interface quality across accessibility, performance, theming, and responsive design. Generates a prioritized report with severity ratings. Use when the user wants a design review, accessibility check, quality audit, or a full list of UI issues to fix.
 ---
 
 Run systematic quality checks and generate a comprehensive audit report with prioritized issues and actionable recommendations. Don't fix issues - document them for other commands to address.
 
-**First**: Use the frontend-design skill for design principles and anti-patterns.
+**First**: Invoke /frontend-design for design principles and anti-patterns.
 
 ## Diagnostic Scan
 
