@@ -87,7 +87,7 @@
             </div>
           </div>
         </div>
-        <p class="hero-version-link"><a href="#changelog">v1.5.1 — /typeset app typography fix</a></p>
+        <p class="hero-version-link"><a href="#changelog">v1.6.0 — Trae support, scoring for /critique and /audit, build overhaul</a></p>
       </div>
 
       <!-- Right: Before/After Demo -->
@@ -319,6 +319,25 @@
       </div>
 
       <div class="changelog-list" data-reveal>
+        <div class="changelog-entry">
+          <div class="changelog-version-header">
+            <span class="changelog-version">v1.6.0</span>
+            <span class="changelog-date">March 24, 2026</span>
+          </div>
+          <ul class="changelog-items">
+            <li>New provider: <strong>Trae</strong> (China + International)</li>
+            <li><code>/critique</code> now scores against Nielsen's 10 heuristics, tests with persona archetypes, and assesses cognitive load (3 new reference files)</li>
+            <li><code>/audit</code> now scores 5 dimensions 0-4 with P0-P3 severity ratings and structured action plans</li>
+            <li>Improved skill descriptions with "Use when..." trigger phrases for better agent discovery</li>
+            <li>Build system consolidated: 8 transformer files replaced by a config-driven factory. New providers need only a config entry</li>
+            <li>Fixed invalid YAML frontmatter that broke GitHub preview and Codex loading (<a href="https://github.com/pbakaus/impeccable/issues/67">#67</a>)</li>
+            <li>Codex CLI now uses correct <code>$</code> prefix for command references</li>
+            <li>Skill cross-references now use the correct provider command prefix</li>
+            <li>Hardened pattern rendering (XSS escaping) and clipboard fallback in website</li>
+            <li>New <code>HARNESSES.md</code> reference documenting each provider's skills capabilities</li>
+          </ul>
+        </div>
+
         <div class="changelog-entry">
           <div class="changelog-version-header">
             <span class="changelog-version">v1.5.1</span>
