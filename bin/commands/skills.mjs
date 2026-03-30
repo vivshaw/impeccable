@@ -8,7 +8,7 @@
  */
 
 import { execSync } from 'node:child_process';
-import { existsSync, readFileSync, readdirSync, statSync, mkdirSync, writeFileSync, rmSync, createWriteStream } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync, mkdirSync, writeFileSync, rmSync, renameSync, createWriteStream } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { createInterface } from 'node:readline';
 import { fileURLToPath } from 'node:url';
@@ -59,13 +59,87 @@ async function showHelp() {
 
 // ─── skills install ───────────────────────────────────────────────────────────
 
-async function install() {
+// Check if impeccable skills are already present in any provider folder
+function isAlreadyInstalled(root) {
+  for (const d of PROVIDER_DIRS) {
+    const skillsDir = join(root, d, 'skills');
+    if (!existsSync(skillsDir)) continue;
+    try {
+      const entries = readdirSync(skillsDir);
+      // Look for teach-impeccable (or any prefixed variant like i-teach-impeccable)
+      if (entries.some(e => e === 'teach-impeccable' || e.endsWith('-teach-impeccable'))) {
+        return d;
+      }
+    } catch {}
+  }
+  return null;
+}
+
+function renameSkillsWithPrefix(root, prefix) {
+  let count = 0;
+  for (const d of PROVIDER_DIRS) {
+    const skillsDir = join(root, d, 'skills');
+    if (!existsSync(skillsDir)) continue;
+    try {
+      const entries = readdirSync(skillsDir, { withFileTypes: true });
+      for (const entry of entries) {
+        if (!entry.isDirectory()) continue;
+        // Skip if already prefixed or not an impeccable skill
+        const skillMd = join(skillsDir, entry.name, 'SKILL.md');
+        if (!existsSync(skillMd)) continue;
+        if (entry.name.startsWith(prefix)) continue;
+
+        const newName = prefix + entry.name;
+        const src = join(skillsDir, entry.name);
+        const dest = join(skillsDir, newName);
+
+        renameSync(src, dest);
+
+        // Update the name in SKILL.md frontmatter
+        let content = readFileSync(join(dest, 'SKILL.md'), 'utf8');
+        content = content.replace(/^name:\s*(.+)$/m, (_, name) => `name: ${prefix}${name.trim()}`);
+        writeFileSync(join(dest, 'SKILL.md'), content);
+        count++;
+      }
+    } catch {}
+  }
+  return count;
+}
+
+async function install(flags) {
+  const force = flags.includes('--force');
+  const root = findProjectRoot();
+  const existing = isAlreadyInstalled(root);
+
+  if (existing && !force) {
+    console.log(`Impeccable skills are already installed (found in ${existing}/).`);
+    console.log('Run with --force to reinstall.\n');
+    process.exit(0);
+  }
+
   console.log('Installing impeccable skills via npx skills...\n');
   try {
     execSync('npx skills add pbakaus/impeccable', { stdio: 'inherit' });
   } catch (e) {
     process.exit(e.status ?? 1);
   }
+
+  // Ask about prefixing
+  let prefix = '';
+  console.log();
+  const wantPrefix = await ask('Prefix commands to avoid conflicts? e.g. /i-audit instead of /audit (y/N) ');
+  if (wantPrefix === 'y' || wantPrefix === 'yes') {
+    const custom = await ask('Prefix (default: i-): ');
+    prefix = custom || 'i-';
+
+    const count = renameSkillsWithPrefix(root, prefix);
+    if (count > 0) {
+      console.log(`\nRenamed ${count} skills with "${prefix}" prefix.`);
+      console.log(`Commands are now available as /${prefix}<command> (e.g. /${prefix}audit).`);
+    }
+  }
+
+  console.log(`\nDone! Run /${prefix}teach-impeccable in your AI harness to set up design context.\n`);
 }
 
 // ─── skills update ────────────────────────────────────────────────────────────
@@ -270,7 +344,7 @@ export async function run(args) {
   if (!sub || sub === 'help' || sub === '--help' || sub === '-h') {
     await showHelp();
   } else if (sub === 'install') {
-    await install();
+    await install(args.slice(1));
   } else if (sub === 'update') {
     await update();
   } else {
