@@ -1,6 +1,6 @@
 {
   "name": "impeccable-skills",
-  "version": "2.1.0",
+  "version": "2.0.6",
   "private": true,
   "author": "Paul Bakaus",
   "description": "Design skills and commands for AI harnesses",
@@ -39,6 +39,6 @@
     "wrangler": "^4.75.0"
   },
   "dependencies": {
-    "impeccable": "^2.1.0"
+    "impeccable": "^2.0.6"
   }
 }
