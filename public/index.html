@@ -487,11 +487,8 @@
           </div>
           <ul class="changelog-items">
             <li>Anti-pattern detection engine with 25 rules across typography, color, layout, motion, and design quality</li>
-            <li>CLI: <code>npx impeccable detect</code> scans HTML, CSS, JSX/TSX, Vue, Svelte, and CSS-in-JS files</li>
-            <li>Browser overlay: <code>npx impeccable live</code> serves a live detection overlay you can inject into any page</li>
-            <li>Framework-aware: detects Next.js, Vite, SvelteKit, Nuxt, and Astro projects and suggests scanning the dev server</li>
-            <li>Multi-file import graph: findings show which files import flagged components</li>
-            <li><code>/critique</code> now runs automated detection alongside the LLM review</li>
+            <li>CLI: <code>npx impeccable detect</code> scans HTML, CSS, JSX/TSX, Vue, Svelte, and CSS-in-JS files with framework detection, multi-file import tracking, and CI/CD-ready JSON output</li>
+            <li><code>/critique</code> now runs automated detection and opens a browser overlay so you can review flagged anti-patterns live on the page</li>
             <li><a href="/gallery">Gallery of Shame</a>: real examples with live detection overlays</li>
           </ul>
         </div>
