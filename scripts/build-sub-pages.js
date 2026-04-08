@@ -213,6 +213,124 @@ ${mainHtml}
 }
 
 /**
+ * Group anti-pattern rules by skill section.
+ * Rules without a skillSection fall into a 'General quality' bucket.
+ */
+function groupRulesBySection(rules) {
+  const order = [
+    'Visual Details',
+    'Typography',
+    'Color & Contrast',
+    'Layout & Space',
+    'Motion',
+    'General quality',
+  ];
+  const bySection = {};
+  for (const name of order) bySection[name] = [];
+  for (const rule of rules) {
+    const section = rule.skillSection || 'General quality';
+    if (!bySection[section]) bySection[section] = [];
+    bySection[section].push(rule);
+  }
+  // Sort each bucket: slop first (they're the named tells), then quality.
+  for (const name of Object.keys(bySection)) {
+    bySection[name].sort((a, b) => {
+      if (a.category !== b.category) return a.category === 'slop' ? -1 : 1;
+      return a.name.localeCompare(b.name);
+    });
+  }
+  return { order, bySection };
+}
+
+/**
+ * Render the anti-patterns sidebar: a table of contents of rule sections
+ * with per-section rule counts. Every entry anchor-jumps to the section
+ * in the main column.
+ */
+function renderAntiPatternsSidebar(grouped) {
+  const entries = grouped.order
+    .filter((section) => grouped.bySection[section]?.length > 0)
+    .map((section) => {
+      const slug = slugify(section);
+      const count = grouped.bySection[section].length;
+      return `        <li><a href="#section-${slug}"><span>${escapeHtml(section)}</span><span class="anti-patterns-sidebar-count">${count}</span></a></li>`;
+    })
+    .join('\n');
+
+  return `
+<aside class="skills-sidebar anti-patterns-sidebar" aria-label="Anti-pattern sections">
+  <div class="skills-sidebar-inner">
+    <p class="skills-sidebar-label">Sections</p>
+    <div class="skills-sidebar-group">
+      <ul class="skills-sidebar-list anti-patterns-sidebar-list">
+${entries}
+      </ul>
+    </div>
+  </div>
+</aside>`;
+}
+
+/**
+ * Render one rule card inside the anti-patterns main column.
+ */
+function renderRuleCard(rule) {
+  const categoryLabel = rule.category === 'slop' ? 'AI slop' : 'Quality';
+  const skillLink = rule.skillSection
+    ? `<a class="rule-card-skill-link" href="/skills/impeccable#${slugify(rule.skillSection)}">See in /impeccable</a>`
+    : '';
+  return `
+    <article class="rule-card" id="rule-${rule.id}">
+      <div class="rule-card-head">
+        <code class="rule-card-id">${escapeHtml(rule.id)}</code>
+        <span class="rule-card-category" data-category="${rule.category}">${categoryLabel}</span>
+      </div>
+      <h3 class="rule-card-name">${escapeHtml(rule.name)}</h3>
+      <p class="rule-card-desc">${escapeHtml(rule.description)}</p>
+      ${skillLink}
+    </article>`;
+}
+
+/**
+ * Render the /anti-patterns main column content.
+ */
+function renderAntiPatternsMain(grouped, totalRules) {
+  let sectionsHtml = '';
+  for (const section of grouped.order) {
+    const rules = grouped.bySection[section] || [];
+    if (rules.length === 0) continue;
+    const slug = slugify(section);
+    sectionsHtml += `
+    <section class="anti-patterns-section" id="section-${slug}">
+      <header class="anti-patterns-section-header">
+        <h2 class="anti-patterns-section-title">${escapeHtml(section)}</h2>
+        <p class="anti-patterns-section-count">${rules.length} ${rules.length === 1 ? 'rule' : 'rules'}</p>
+      </header>
+      <div class="rule-card-grid">
+${rules.map(renderRuleCard).join('\n')}
+      </div>
+    </section>`;
+  }
+
+  return `
+<div class="anti-patterns-content">
+  <header class="anti-patterns-header">
+    <p class="sub-page-eyebrow">${totalRules} detection rules</p>
+    <h1 class="sub-page-title">Anti-patterns</h1>
+    <p class="sub-page-lede">These are the visible tells of AI-generated interfaces. Every rule in this catalog is implemented as a deterministic check in <code>npx impeccable detect</code> and in the browser extension. Run <a href="/skills/critique">/critique</a> on any page to see which ones it triggers.</p>
+  </header>
+
+  <section class="anti-patterns-legend">
+    <h2 class="anti-patterns-legend-title">How to read this</h2>
+    <p>Rules are grouped by the section of the <a href="/skills/impeccable">/impeccable</a> skill that teaches the pattern to avoid. <strong>AI slop</strong> rules flag the specific visual tells (gradient text, purple palettes, side-tab borders, nested cards). <strong>Quality</strong> rules flag general design mistakes that are not AI-specific but still hurt the work.</p>
+  </section>
+
+  <div class="anti-patterns-sections">
+${sectionsHtml}
+  </div>
+</div>`;
+}
+
+/**
  * Entry point. Generates all sub-page HTML files.
  *
  * @param {string} rootDir
@@ -267,6 +385,24 @@ export async function generateSubPages(rootDir) {
       bodyClass: 'sub-page skills-layout-page',
     });
     const out = path.join(outDirs.skills, `${skill.id}.html`);
+    fs.writeFileSync(out, html, 'utf-8');
+    generated.push(out);
+  }
+
+  // Anti-patterns index: single page, docs-browser shell with TOC sidebar.
+  {
+    const grouped = groupRulesBySection(data.rules);
+    const sidebar = renderAntiPatternsSidebar(grouped);
+    const main = renderAntiPatternsMain(grouped, data.rules.length);
+    const html = renderPage({
+      title: 'Anti-patterns | Impeccable',
+      description: `${data.rules.length} deterministic detection rules that flag the visible tells of AI-generated interfaces and common quality issues. Used by npx impeccable detect and the browser extension.`,
+      bodyHtml: wrapInDocsLayout(sidebar, main),
+      activeNav: 'anti-patterns',
+      canonicalPath: '/anti-patterns',
+      bodyClass: 'sub-page skills-layout-page anti-patterns-page',
+    });
+    const out = path.join(outDirs.antiPatterns, 'index.html');
     fs.writeFileSync(out, html, 'utf-8');
     generated.push(out);
   }
