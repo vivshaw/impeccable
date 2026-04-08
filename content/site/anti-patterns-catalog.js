@@ -5,18 +5,18 @@
  * are parsed at build time. This file adds three pieces of content that
  * can't be automated:
  *
- *  1. DETECTION_LAYERS — which layer (cli, browser, or llm) catches the
+ *  1. DETECTION_LAYERS: which layer (cli, browser, or llm) catches the
  *     rule. Manually classified by reading the detector source and the
  *     browser-only test file.
  *
- *  2. VISUAL_EXAMPLES — a tiny inline HTML snippet showing what the
+ *  2. VISUAL_EXAMPLES: a tiny inline HTML snippet showing what the
  *     bad pattern actually looks like. Rendered inside each rule card.
  *     Snippets should be self-contained with inline styles, use the
  *     cream/paper/ink palette when possible, and sit naturally at
- *     ~100% width × ~120px height.
+ *     ~100% width by ~120px height.
  *
- *  3. LLM_ONLY_RULES — DON'T lines from source/skills/impeccable/SKILL.md
- *     that don't map to any detection rule. These can only be caught by
+ *  3. LLM_ONLY_RULES: DON'T lines from source/skills/impeccable/SKILL.md
+ *     that do not map to any detection rule. These can only be caught by
  *     the /critique skill's LLM pass. They appear on the /anti-patterns
  *     page alongside detected rules with an 'llm' layer badge.
  */
@@ -26,13 +26,13 @@
 /**
  * Which layer catches each rule.
  *
- *  'cli'     — static analysis or jsdom (works with `npx impeccable detect`
- *              on files, no browser required)
- *  'browser' — requires real browser layout (getBoundingClientRect with
- *              actual dimensions). Works via Puppeteer or the browser
- *              extension, NOT via the CLI on raw HTML.
- *  'llm'     — no deterministic detector; only caught by /critique's LLM
- *              assessment pass.
+ *  'cli':     static analysis or jsdom (works with `npx impeccable detect`
+ *             on files, no browser required)
+ *  'browser': requires real browser layout (getBoundingClientRect with
+ *             actual dimensions). Works via Puppeteer or the browser
+ *             extension, NOT via the CLI on raw HTML.
+ *  'llm':     no deterministic detector; only caught by /critique's LLM
+ *             assessment pass.
  *
  * Per tests/detect-antipatterns-browser.test.mjs: only two rules genuinely
  * need real browser layout. Everything else is 'cli'.
@@ -126,7 +126,7 @@ export const VISUAL_EXAMPLES = {
 
   'tight-leading': `<div style="font-family: system-ui, sans-serif; font-size: 13px; color: #111; line-height: 1.0; max-width: 220px;">Tight leading makes multi-line body text feel crammed and hard for the eye to track between lines.</div>`,
 
-  'skipped-heading': `<div style="font-family: system-ui, sans-serif; color: #111;"><h1 style="font-size: 20px; font-weight: 700; margin: 0 0 4px;">Page title (h1)</h1><h3 style="font-size: 13px; font-weight: 600; margin: 0; color: #555;">Subsection (h3) — skipped h2</h3></div>`,
+  'skipped-heading': `<div style="font-family: system-ui, sans-serif; color: #111;"><h1 style="font-size: 20px; font-weight: 700; margin: 0 0 4px;">Page title (h1)</h1><h3 style="font-size: 13px; font-weight: 600; margin: 0; color: #555;">Subsection (h3), skipped h2</h3></div>`,
 
   'justified-text': `<div style="font-family: system-ui, sans-serif; font-size: 12px; color: #111; text-align: justify; max-width: 230px; line-height: 1.5;">Justified text on screens creates rivers of whitespace because browsers can't hyphenate well. Leave this for print.</div>`,
 

@@ -366,7 +366,6 @@ function renderAntiPatternsSidebar(grouped) {
     <div class="skills-sidebar-group">
       <ul class="skills-sidebar-list anti-patterns-sidebar-list">
 ${entries}
-        <li><a href="#in-the-wild"><span>In the wild</span><span class="anti-patterns-sidebar-count">${GALLERY_ITEMS.length}</span></a></li>
       </ul>
     </div>
   </div>
@@ -439,6 +438,82 @@ ${cards}
 }
 
 /**
+ * Render the /visual-mode page main content.
+ *
+ * Single-column layout, no sidebar. Editorial header, live iframe embed
+ * of the detector running on a synthetic slop page, three-card section
+ * explaining the invocation methods, then a grid of real specimens the
+ * user can click into to see the overlay on a different page.
+ */
+function renderVisualModeMain() {
+  const specimenCards = GALLERY_ITEMS.map(
+    (item) => `
+      <a class="gallery-card" href="/antipattern-examples/${item.id}.html">
+        <div class="gallery-card-thumb">
+          <img src="/antipattern-images/${item.id}.png" alt="${escapeAttr(item.title)} specimen" loading="lazy" width="540" height="540">
+        </div>
+        <div class="gallery-card-body">
+          <h3 class="gallery-card-title">${escapeHtml(item.title)}</h3>
+          <p class="gallery-card-desc">${escapeHtml(item.desc)}</p>
+        </div>
+      </a>`,
+  ).join('\n');
+
+  return `
+<div class="visual-mode-page">
+  <header class="visual-mode-page-header">
+    <p class="sub-page-eyebrow">Live detection overlay</p>
+    <h1 class="sub-page-title">Visual Mode</h1>
+    <p class="sub-page-lede">See every anti-pattern flagged directly on the page. No screenshots, no JSON to map back to line numbers. The overlay draws an outline and a label on every element the detector catches, so you fix them in place.</p>
+  </header>
+
+  <section class="visual-mode-demo-wrap" aria-label="Visual Mode demo">
+    <div class="visual-mode-preview">
+      <div class="visual-mode-preview-header">
+        <span class="visual-mode-preview-dot red"></span>
+        <span class="visual-mode-preview-dot yellow"></span>
+        <span class="visual-mode-preview-dot green"></span>
+        <span class="visual-mode-preview-title">Live on a synthetic slop page</span>
+      </div>
+      <iframe src="/antipattern-examples/visual-mode-demo.html" class="visual-mode-frame" loading="lazy" title="Impeccable overlay running on a demo page"></iframe>
+    </div>
+    <p class="visual-mode-demo-caption">Hover or tap any outlined element to see which rule fired.</p>
+  </section>
+
+  <section class="visual-mode-methods" aria-label="Where to run Visual Mode">
+    <h2 class="visual-mode-methods-title">Three ways to run it</h2>
+    <div class="visual-mode-methods-grid">
+      <article class="visual-mode-method">
+        <p class="visual-mode-method-label">Inside /critique</p>
+        <h3 class="visual-mode-method-name"><a href="/skills/critique">/critique</a></h3>
+        <p class="visual-mode-method-desc">The design review skill opens the overlay automatically during its browser assessment pass. You get the deterministic findings highlighted in place while the LLM runs its separate heuristic review.</p>
+      </article>
+      <article class="visual-mode-method">
+        <p class="visual-mode-method-label">Standalone CLI</p>
+        <h3 class="visual-mode-method-name"><code>npx impeccable live</code></h3>
+        <p class="visual-mode-method-desc">Starts a local overlay server, then loads any URL you paste in an iframe with the detector script injected. Works on your own dev server, a staging URL, or anyone's live page.</p>
+      </article>
+      <article class="visual-mode-method" data-coming-soon>
+        <p class="visual-mode-method-label">Coming soon</p>
+        <h3 class="visual-mode-method-name">Chrome extension</h3>
+        <p class="visual-mode-method-desc">One-click activation on any tab. Currently in Chrome Web Store review. <a href="https://impeccablestyle.substack.com" target="_blank" rel="noopener">Get notified when it lands &rarr;</a></p>
+      </article>
+    </div>
+  </section>
+
+  <section class="visual-mode-gallery" aria-label="Try it on synthetic specimens">
+    <header class="visual-mode-gallery-header">
+      <h2 class="visual-mode-gallery-title">Try it live</h2>
+      <p class="visual-mode-gallery-lede">These ${GALLERY_ITEMS.length} synthetic slop pages ship with the detector script baked in. Click any to see the overlay running on a real page, then scroll around and hover the outlined elements.</p>
+    </header>
+    <div class="gallery-grid">
+${specimenCards}
+    </div>
+  </section>
+</div>`;
+}
+
+/**
  * Render a tutorial detail page main content.
  */
 function renderTutorialDetail(tutorial, knownSkillIds) {
@@ -483,25 +558,12 @@ ${rules.map(renderRuleCard).join('\n')}
     .filter((r) => r.layer !== 'llm').length;
   const llmCount = totalRules - detectedCount;
 
-  const galleryHtml = GALLERY_ITEMS.map(
-    (item) => `
-      <a class="gallery-card" href="/antipattern-examples/${item.id}.html">
-        <div class="gallery-card-thumb">
-          <img src="/antipattern-images/${item.id}.png" alt="${escapeAttr(item.title)} example" loading="lazy" width="540" height="540">
-        </div>
-        <div class="gallery-card-body">
-          <h3 class="gallery-card-title">${escapeHtml(item.title)}</h3>
-          <p class="gallery-card-desc">${escapeHtml(item.desc)}</p>
-        </div>
-      </a>`,
-  ).join('\n');
-
   return `
 <div class="anti-patterns-content">
   <header class="anti-patterns-header">
     <p class="sub-page-eyebrow">${totalRules} rules</p>
     <h1 class="sub-page-title">Anti-patterns</h1>
-    <p class="sub-page-lede">The full catalog of patterns <a href="/skills/impeccable">/impeccable</a> teaches against. ${detectedCount} are caught by a deterministic detector (<code>npx impeccable detect</code> or the browser extension). ${llmCount} can only be flagged by <a href="/skills/critique">/critique</a>'s LLM review pass.</p>
+    <p class="sub-page-lede">The full catalog of patterns <a href="/skills/impeccable">/impeccable</a> teaches against. ${detectedCount} are caught by a deterministic detector (<code>npx impeccable detect</code> or the browser extension). ${llmCount} can only be flagged by <a href="/skills/critique">/critique</a>'s LLM review pass. Want to see them live on real pages? Try <a href="/visual-mode">Visual Mode</a>.</p>
   </header>
 
   <details class="anti-patterns-legend">
@@ -522,17 +584,6 @@ ${rules.map(renderRuleCard).join('\n')}
   <div class="anti-patterns-sections">
 ${sectionsHtml}
   </div>
-
-  <section class="gallery-section" id="in-the-wild">
-    <header class="anti-patterns-section-header">
-      <h2 class="anti-patterns-section-title">In the wild</h2>
-      <p class="anti-patterns-section-count">${GALLERY_ITEMS.length} specimens</p>
-    </header>
-    <p class="gallery-section-lede">Real examples scraped from the web. Click any to see the live page with the overlay running.</p>
-    <div class="gallery-grid">
-${galleryHtml}
-    </div>
-  </section>
 </div>`;
 }
 
@@ -548,6 +599,7 @@ export async function generateSubPages(rootDir) {
     skills: path.join(rootDir, 'public/skills'),
     antiPatterns: path.join(rootDir, 'public/anti-patterns'),
     tutorials: path.join(rootDir, 'public/tutorials'),
+    visualMode: path.join(rootDir, 'public/visual-mode'),
   };
 
   // Fresh output dirs each time so stale files don't linger.
@@ -626,6 +678,22 @@ export async function generateSubPages(rootDir) {
       bodyClass: 'sub-page skills-layout-page tutorials-page',
     });
     const out = path.join(outDirs.tutorials, 'index.html');
+    fs.writeFileSync(out, html, 'utf-8');
+    generated.push(out);
+  }
+
+  // Visual Mode: single standalone page, no sidebar, single-column layout.
+  {
+    const html = renderPage({
+      title: 'Visual Mode | Impeccable',
+      description:
+        'See every anti-pattern flagged directly on the page. Live detection overlay from Impeccable, available via /critique, npx impeccable live, or the upcoming Chrome extension.',
+      bodyHtml: renderVisualModeMain(),
+      activeNav: 'visual-mode',
+      canonicalPath: '/visual-mode',
+      bodyClass: 'sub-page visual-mode-page-body',
+    });
+    const out = path.join(outDirs.visualMode, 'index.html');
     fs.writeFileSync(out, html, 'utf-8');
     generated.push(out);
   }
