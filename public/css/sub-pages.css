@@ -861,6 +861,62 @@ main#main {
 }
 
 /* ============================================
+   TUTORIAL EMBEDS (live overlays, screenshots)
+   ============================================ */
+
+.tutorial-embed {
+  margin: var(--spacing-lg) 0 var(--spacing-xl);
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--color-mist);
+  box-shadow: 0 8px 30px -6px rgba(0, 0, 0, 0.12);
+  max-width: none;
+}
+
+.tutorial-embed-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  background: var(--color-cream);
+  border-bottom: 1px solid var(--color-mist);
+}
+
+.tutorial-embed-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.tutorial-embed-dot.red { background: #ff5f56; }
+.tutorial-embed-dot.yellow { background: #ffbd2e; }
+.tutorial-embed-dot.green { background: #27c93f; }
+
+.tutorial-embed-title {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-ash);
+}
+
+.tutorial-embed-iframe {
+  display: block;
+  width: 100%;
+  height: 520px;
+  border: none;
+  background: white;
+}
+
+.tutorial-embed-caption {
+  font-size: 0.8125rem;
+  color: var(--color-ash);
+  margin-top: var(--spacing-sm);
+  font-style: italic;
+  max-width: 60ch;
+}
+
+/* ============================================
    TUTORIAL DETAIL
    ============================================ */
 
@@ -1043,32 +1099,60 @@ main#main {
 }
 
 .skill-detail-editorial {
-  margin-bottom: clamp(3rem, 6vw, 4.5rem);
+  margin-bottom: clamp(2rem, 4vw, 3rem);
 }
 
-.skill-detail-divider {
+/* "The skill itself" card: visually contains the auto-rendered SKILL.md
+   body so it reads as a distinct reference block, not a continuation of
+   the editorial section above. */
+.skill-source-card {
+  background: var(--color-paper);
+  border: 1px solid var(--color-mist);
+  border-radius: 12px;
+  padding: clamp(var(--spacing-md), 3vw, var(--spacing-xl));
+  margin-top: clamp(2rem, 4vw, 3rem);
+  box-shadow: 0 1px 0 oklch(90% 0 0);
+}
+
+.skill-source-card-header {
   display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-  margin: clamp(3rem, 6vw, 4.5rem) 0 clamp(2rem, 4vw, 3rem);
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  padding-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--color-mist);
 }
 
-.skill-detail-divider::before,
-.skill-detail-divider::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: var(--color-mist);
-}
-
-.skill-detail-divider span {
+.skill-source-card-label {
   font-family: var(--font-mono);
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: var(--color-ash);
+  letter-spacing: 0.1em;
+  color: var(--color-accent);
+  padding: 3px 8px;
+  background: var(--color-accent-dim);
+  border-radius: 4px;
   flex-shrink: 0;
+}
+
+.skill-source-card-subtitle {
+  font-size: 0.8125rem;
+  color: var(--color-ash);
+  font-style: italic;
+}
+
+.skill-source-card-body {
+  max-width: none;
+}
+
+.skill-source-card-body > :first-child {
+  margin-top: 0;
+}
+
+.skill-source-card-body > :last-child {
+  margin-bottom: 0;
 }
 
 .skill-references {

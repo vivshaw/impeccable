@@ -83,7 +83,6 @@ export const commandCategories = {
   'shape': 'create',
   'impeccable craft': 'create',
   'impeccable': 'create',
-  'onboard': 'create',
   'overdrive': 'create',
   // EVALUATE - review and assess
   'critique': 'evaluate',
@@ -96,6 +95,7 @@ export const commandCategories = {
   'delight': 'refine',
   'bolder': 'refine',
   'quieter': 'refine',
+  'onboard': 'refine',
   // SIMPLIFY - reduce and clarify
   'distill': 'simplify',
   'clarify': 'simplify',

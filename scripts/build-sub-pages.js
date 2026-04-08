@@ -94,12 +94,14 @@ ${refBody}
 
   ${editorialHtml ? `<section class="skill-detail-editorial prose">\n${editorialHtml}\n</section>` : ''}
 
-  <div class="skill-detail-divider">
-    <span>The skill itself</span>
-  </div>
-
-  <section class="skill-detail-body prose">
+  <section class="skill-source-card">
+    <header class="skill-source-card-header">
+      <span class="skill-source-card-label">SKILL.md</span>
+      <span class="skill-source-card-subtitle">The canonical skill definition your AI harness loads.</span>
+    </header>
+    <div class="skill-source-card-body prose">
 ${bodyHtml}
+    </div>
   </section>
 
   ${referencesHtml}

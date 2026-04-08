@@ -85,5 +85,5 @@ Review the diff. If something does not feel right, ask the model to explain the 
 ## Common issues
 
 - **The skill says "no design context found"**. You skipped step 2. Run `/impeccable teach` first.
-- **Commands do not appear in the harness**. Make sure your harness supports skills and has skills enabled. Cursor needs Nightly channel plus Agent Skills in Settings. Gemini CLI needs the preview version.
+- **Commands do not appear in the harness**. Reload the harness after installing. If they still do not appear, check that the installer wrote files into the expected location (`.claude/skills/`, `.cursor/skills/`, etc.) and that your harness is picking up that directory.
 - **The polish pass rewrote something you liked**. Say so. Revert the change, tell the model which specific edit to undo, and continue from there.

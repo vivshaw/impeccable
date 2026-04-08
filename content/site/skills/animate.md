@@ -39,5 +39,4 @@ Typical additions:
 ## Pitfalls
 
 - **Asking for "more animation".** Animate is not a dial. It adds where motion communicates, not everywhere.
-- **Animating layout properties.** Never `width`, `height`, `top`, `left`, `padding`, `margin`. Transform and opacity only.
-- **Skipping reduced-motion fallbacks.** Non-negotiable for accessibility. Animate will add them; do not remove them.
+- **Removing the reduced-motion fallbacks.** The skill adds them automatically. Non-negotiable for accessibility.

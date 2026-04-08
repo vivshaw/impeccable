@@ -32,7 +32,6 @@ const SKILL_CATEGORIES = {
   // CREATE - build something new
   impeccable: 'create',
   shape: 'create',
-  onboard: 'create',
   overdrive: 'create',
   // EVALUATE - review and assess
   critique: 'evaluate',
@@ -45,6 +44,7 @@ const SKILL_CATEGORIES = {
   delight: 'refine',
   bolder: 'refine',
   quieter: 'refine',
+  onboard: 'refine',
   // SIMPLIFY - reduce and clarify
   distill: 'simplify',
   clarify: 'simplify',

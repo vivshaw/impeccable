@@ -41,11 +41,25 @@ You get back a JSON list of every finding with its element selector, the rule th
 
 ## Step 2. Open the visual overlay
 
-Impeccable ships with a visual mode that highlights every detected anti-pattern directly on the page. You have three ways to run it:
+Impeccable ships with a visual mode that highlights every detected anti-pattern directly on the page. Here is what it looks like running on a deliberately-bad synthwave landing page:
 
-1. **Chrome extension (coming soon)**: one-click activation on any page, yours or anyone's.
-2. **Inside `/critique`**: the skill automatically opens the overlay during the browser portion of the assessment.
-3. **Standalone CLI**: `npx impeccable live` starts a local overlay server, then you paste the URL you want to inspect.
+<div class="tutorial-embed">
+  <div class="tutorial-embed-header">
+    <span class="tutorial-embed-dot red"></span>
+    <span class="tutorial-embed-dot yellow"></span>
+    <span class="tutorial-embed-dot green"></span>
+    <span class="tutorial-embed-title">Live detection overlay</span>
+  </div>
+  <iframe src="/antipattern-examples/visual-mode-demo.html" class="tutorial-embed-iframe" loading="lazy" title="Impeccable visual overlay running on a demo page"></iframe>
+</div>
+
+Every outlined element has a floating label naming the rule that fired. Hover an outline to see the full finding. This is exactly what you will see on your own page.
+
+You have three ways to open it:
+
+1. **Chrome extension (coming soon)**: one-click activation on any page.
+2. **Inside `/critique`**: the skill opens the overlay automatically during the browser portion of the assessment.
+3. **Standalone CLI**: `npx impeccable live` starts a local overlay server, then you paste any URL.
 
 For this tutorial we will use the standalone CLI so you can see it without depending on the extension.
 
@@ -55,7 +69,7 @@ In a new terminal:
 npx impeccable live
 ```
 
-This starts a server on `localhost:5199`. Open it. Paste the URL of your pricing page. The page loads inside an iframe with the detector script injected. Every flagged anti-pattern gets an outline and a floating label naming the rule.
+This starts a server on `localhost:5199`. Open it. Paste the URL of your pricing page. The page loads inside an iframe with the detector script injected, and you get back the same overlay you saw above but on your own work.
 
 ## Step 3. Merge the two assessments
 

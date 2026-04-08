@@ -10,17 +10,9 @@ Do not use it on operator tools, dashboards, or anything where reliability beats
 
 ## How it works
 
-The skill starts by picking the one moment to make extraordinary, not spreading effort across the whole interface. Then it reaches for technically ambitious implementations that most AI-generated UIs never touch:
+The skill picks one moment to make extraordinary and commits to it, rather than spreading effort across the whole interface. It then reaches for techniques most AI-generated UIs never touch: WebGL shaders, spring physics, Scroll Timeline, View Transitions, canvas animation, GPU-accelerated filters. Everything is budgeted, profiled, and tested at 60fps, with reduced-motion fallbacks baked in.
 
-- **Shaders and WebGL** for hero visuals and background effects
-- **Spring physics** (react-spring, framer-motion springs) instead of CSS transitions for elements the user drags, flicks, or directly manipulates
-- **Scroll-driven animations** using Scroll Timeline API, not scroll listeners
-- **View transitions** for cinematic page changes
-- **Canvas and SVG animation** for custom visualizations that actually interact
-- **GPU-accelerated filters** (backdrop-filter, SVG filters) used with purpose
-- **60fps everywhere**: every animation budgeted, profiled, and tested
-
-The skill output is announced with `──── ⚡ OVERDRIVE ────` so you know you are entering a more ambitious mode. Expect larger diffs, new dependencies, and implementation depth beyond what other skills produce.
+Overdrive output is announced with `──── ⚡ OVERDRIVE ────` so you know you are entering a more ambitious mode. Expect larger diffs, new dependencies, and implementation depth beyond what other skills produce.
 
 ## Try it
 
@@ -28,13 +20,7 @@ The skill output is announced with `──── ⚡ OVERDRIVE ────` so 
 /overdrive the landing hero
 ```
 
-Expected additions might include:
-
-- A WebGL shader background driven by mouse position and scroll
-- Display headline with a mask reveal on scroll using Scroll Timeline
-- Featured product image with a 3D tilt effect on pointer move
-- A View Transition on the CTA that morphs into the next page
-- Full reduced-motion fallback that swaps all of it for a static composition
+One concrete run might replace a static hero with a WebGL shader background driven by mouse position, a display headline that reveals with a mask on scroll using the Scroll Timeline API, and a View Transition on the CTA that morphs into the next page. Plus a reduced-motion fallback that swaps all of it for a clean static composition.
 
 ## Pitfalls
 
