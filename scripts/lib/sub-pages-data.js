@@ -36,7 +36,6 @@ const EXCLUDED_SKILLS = new Set([
   'teach-impeccable',  // deprecated, folded into /impeccable teach
   'arrange',           // renamed to layout
   'normalize',         // merged into /polish
-  'onboard',           // merged into /harden
 ]);
 
 /**
@@ -69,6 +68,7 @@ const SKILL_CATEGORIES = {
   polish: 'harden',
   optimize: 'harden',
   harden: 'harden',
+  onboard: 'harden',
   // SYSTEM - setup and tooling
   teach: 'system',
   extract: 'system',
@@ -126,6 +126,7 @@ export const COMMAND_RELATIONSHIPS = {
   polish: {},
   optimize: {},
   harden: { combinesWith: ['optimize'] },
+  onboard: { combinesWith: ['clarify', 'delight'] },
   // System
   teach: {},
   extract: {},

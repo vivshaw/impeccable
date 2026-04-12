@@ -44,6 +44,7 @@ const commandSymbols = {
 	'polish': 'Po',
 	'optimize': 'Op',
 	'harden': 'Ha',
+	'onboard': 'On',
 	'teach': 'Te',
 	'extract': 'Ex'
 };
@@ -54,8 +55,8 @@ const commandNumbers = {
 	'typeset': 6, 'layout': 7, 'colorize': 8, 'animate': 9,
 	'delight': 10, 'bolder': 11, 'quieter': 12, 'overdrive': 13,
 	'distill': 14, 'clarify': 15, 'adapt': 16,
-	'polish': 17, 'optimize': 18, 'harden': 19,
-	'teach': 20, 'extract': 21
+	'polish': 17, 'optimize': 18, 'harden': 19, 'onboard': 20,
+	'teach': 21, 'extract': 22
 };
 
 // After the v3.0 consolidation, all commands except the root "impeccable" are

@@ -1,6 +1,6 @@
 # Impeccable
 
-The vocabulary you didn't know you needed. 1 skill, 20 commands, and curated anti-patterns for impeccable frontend design.
+The vocabulary you didn't know you needed. 1 skill, 21 commands, and curated anti-patterns for impeccable frontend design.
 
 > **Quick start:** Visit [impeccable.style](https://impeccable.style) to download ready-to-use bundles.
 
@@ -12,7 +12,7 @@ Every LLM learned from the same generic templates. Without guidance, you get the
 
 Impeccable fights that bias with:
 - **An expanded skill** with 7 domain-specific reference files ([view source](source/skills/impeccable/))
-- **20 commands** to audit, review, polish, distill, animate, and more
+- **21 commands** to audit, review, polish, distill, animate, and more
 - **Curated anti-patterns** that explicitly tell the AI what NOT to do
 
 ## What's Included
@@ -31,7 +31,7 @@ A comprehensive design skill with 7 domain-specific references ([view skill](sou
 | [responsive-design](source/skills/impeccable/reference/responsive-design.md) | Mobile-first, fluid design, container queries |
 | [ux-writing](source/skills/impeccable/reference/ux-writing.md) | Button labels, error messages, empty states |
 
-### 20 Commands
+### 21 Commands
 
 All commands are accessed through `/impeccable`:
 
@@ -47,7 +47,8 @@ All commands are accessed through `/impeccable`:
 | `/impeccable bolder` | Amplify boring designs |
 | `/impeccable quieter` | Tone down overly bold designs |
 | `/impeccable distill` | Strip to essence |
-| `/impeccable harden` | Error handling, onboarding, i18n, edge cases |
+| `/impeccable harden` | Error handling, i18n, text overflow, edge cases |
+| `/impeccable onboard` | First-run flows, empty states, activation paths |
 | `/impeccable animate` | Add purposeful motion |
 | `/impeccable colorize` | Introduce strategic color |
 | `/impeccable typeset` | Fix font choices, hierarchy, sizing |

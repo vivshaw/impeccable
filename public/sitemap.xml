@@ -40,8 +40,8 @@
     <priority>0.9</priority>
   </url>
 
-  <!-- Command detail pages (the impeccable skill + 20 commands) -->
-  <url><loc>https://impeccable.style/docs/impeccable</loc><lastmod>2026-04-10</lastmod><priority>0.9</priority></url>
+  <!-- Command detail pages (the impeccable skill + 21 commands) -->
+  <url><loc>https://impeccable.style/docs/impeccable</loc><lastmod>2026-04-11</lastmod><priority>0.9</priority></url>
   <url><loc>https://impeccable.style/docs/craft</loc><lastmod>2026-04-10</lastmod><priority>0.8</priority></url>
   <url><loc>https://impeccable.style/docs/teach</loc><lastmod>2026-04-10</lastmod><priority>0.8</priority></url>
   <url><loc>https://impeccable.style/docs/extract</loc><lastmod>2026-04-10</lastmod><priority>0.8</priority></url>
@@ -52,7 +52,8 @@
   <url><loc>https://impeccable.style/docs/bolder</loc><lastmod>2026-04-10</lastmod><priority>0.8</priority></url>
   <url><loc>https://impeccable.style/docs/quieter</loc><lastmod>2026-04-10</lastmod><priority>0.8</priority></url>
   <url><loc>https://impeccable.style/docs/distill</loc><lastmod>2026-04-10</lastmod><priority>0.8</priority></url>
-  <url><loc>https://impeccable.style/docs/harden</loc><lastmod>2026-04-10</lastmod><priority>0.8</priority></url>
+  <url><loc>https://impeccable.style/docs/harden</loc><lastmod>2026-04-11</lastmod><priority>0.8</priority></url>
+  <url><loc>https://impeccable.style/docs/onboard</loc><lastmod>2026-04-11</lastmod><priority>0.8</priority></url>
   <url><loc>https://impeccable.style/docs/animate</loc><lastmod>2026-04-10</lastmod><priority>0.8</priority></url>
   <url><loc>https://impeccable.style/docs/colorize</loc><lastmod>2026-04-10</lastmod><priority>0.8</priority></url>
   <url><loc>https://impeccable.style/docs/typeset</loc><lastmod>2026-04-10</lastmod><priority>0.8</priority></url>

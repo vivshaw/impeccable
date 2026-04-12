@@ -13,5 +13,5 @@ The `impeccable` skill in this project builds on Anthropic's original frontend-d
 
 This project extends the original with:
 - 7 domain-specific reference files (typography, color-and-contrast, spatial-design, motion-design, interaction-design, responsive-design, ux-writing)
-- 20 commands
+- 21 commands
 - Expanded patterns and anti-patterns

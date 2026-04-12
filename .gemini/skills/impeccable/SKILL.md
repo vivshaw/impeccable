@@ -1,6 +1,6 @@
 ---
 name: impeccable
-description: "Design fluency for frontend interfaces. Build distinctive, production-grade web components, pages, artifacts, posters, and applications with high design quality. Also handles: critique/review/evaluate designs, audit accessibility/performance/responsive, polish finishing touches, improve typography/fonts/readability, fix layout/spacing/hierarchy, add animation/transitions/motion, adapt for mobile/tablet/responsive, simplify/declutter/distill, amplify bland/generic/safe designs, tone down loud/overwhelming designs, add color to gray/monochromatic interfaces, improve UX copy/labels/error messages, harden for production with edge cases/i18n/errors/empty states, optimize slow/laggy performance, plan UX before coding, extract design tokens, or push boundaries with shaders/physics/scroll effects. Commands: craft, teach, extract, pin, audit, critique, polish, shape, adapt, animate, bolder, quieter, colorize, clarify, delight, distill, harden, layout, optimize, overdrive, typeset."
+description: "Design fluency for frontend interfaces. Build distinctive, production-grade web components, pages, artifacts, posters, and applications with high design quality. Also handles: critique/review/evaluate designs, audit accessibility/performance/responsive, polish finishing touches, improve typography/fonts/readability, fix layout/spacing/hierarchy, add animation/transitions/motion, adapt for mobile/tablet/responsive, simplify/declutter/distill, amplify bland/generic/safe designs, tone down loud/overwhelming designs, add color to gray/monochromatic interfaces, improve UX copy/labels/error messages, harden for production with edge cases/i18n/errors, design onboarding/first-run/empty states/activation flows, optimize slow/laggy performance, plan UX before coding, extract design tokens, or push boundaries with shaders/physics/scroll effects. Commands: craft, teach, extract, pin, audit, critique, polish, shape, adapt, animate, bolder, quieter, colorize, clarify, delight, distill, harden, onboard, layout, optimize, overdrive, typeset."
 version: 3.0.0
 ---
 
@@ -311,6 +311,7 @@ This skill supports sub-commands. Parse the first word of the argument string to
 > `/impeccable quieter [target]` - Tone down aggressive/overstimulating designs
 > `/impeccable distill [target]` - Strip to essence, remove complexity
 > `/impeccable harden [target]` - Production-ready: errors, i18n, edge cases
+> `/impeccable onboard [target]` - Design first-run flows, empty states, activation
 >
 > **Enhance**
 > `/impeccable animate [target]` - Add purposeful animations and motion
@@ -347,7 +348,8 @@ When a sub-command is matched, load the linked reference and follow its instruct
 | `bolder` | [bolder](reference/bolder.md) | Amplify safe or boring designs for more visual impact |
 | `quieter` | [quieter](reference/quieter.md) | Tone down visually aggressive or overstimulating designs |
 | `distill` | [distill](reference/distill.md) | Strip designs to their essence, remove unnecessary complexity |
-| `harden` | [harden](reference/harden.md) | Production-ready: error handling, i18n, edge cases, onboarding |
+| `harden` | [harden](reference/harden.md) | Production-ready: error handling, i18n, text overflow, edge cases |
+| `onboard` | [onboard](reference/onboard.md) | Design onboarding flows, first-run experiences, and empty states that guide users to value |
 | `animate` | [animate](reference/animate.md) | Add purposeful animations and micro-interactions |
 | `colorize` | [colorize](reference/colorize.md) | Add strategic color to monochromatic interfaces |
 | `typeset` | [typeset](reference/typeset.md) | Improve typography: fonts, hierarchy, sizing, readability |

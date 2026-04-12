@@ -71,7 +71,8 @@ export const commandProcessSteps = {
   'adapt': ['Analyze', 'Adjust', 'Optimize'],
   'polish': ['Discover', 'Review', 'Refine', 'Verify'],
   'optimize': ['Profile', 'Identify', 'Improve', 'Measure'],
-  'harden': ['Test', 'Handle', 'Onboard', 'Validate'],
+  'harden': ['Assess', 'Implement', 'Test', 'Verify'],
+  'onboard': ['Identify', 'Design', 'Guide', 'Measure'],
   'teach': ['Explore', 'Interview', 'Synthesize', 'Save'],
   'extract': ['Identify', 'Abstract', 'Migrate', 'Document']
 };
@@ -101,6 +102,7 @@ export const commandCategories = {
   'polish': 'harden',
   'optimize': 'harden',
   'harden': 'harden',
+  'onboard': 'harden',
   // SYSTEM - setup and tooling
   'teach': 'system',
   'extract': 'system'
@@ -134,7 +136,8 @@ export const commandRelationships = {
   'adapt': { combinesWith: ['polish', 'clarify'], flow: 'Simplify: Adapt for different contexts' },
   'polish': { flow: 'Harden: Final pass and design system alignment' },
   'optimize': { flow: 'Harden: Performance improvements' },
-  'harden': { combinesWith: ['optimize'], flow: 'Harden: Edge cases, onboarding, and error handling' },
+  'harden': { combinesWith: ['optimize'], flow: 'Harden: Edge cases, error handling, and i18n' },
+  'onboard': { combinesWith: ['clarify', 'delight'], flow: 'Harden: First-run experiences and empty states' },
   'teach': { flow: 'System: One-time project design context setup' },
   'extract': { flow: 'System: Extract design system components and tokens' }
 };

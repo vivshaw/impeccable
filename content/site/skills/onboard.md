@@ -4,11 +4,11 @@ tagline: "Design first-run experiences, empty states, and paths to value."
 
 ## When to use it
 
-`/onboard` is for the moments that decide whether a new user sticks around: the first screen, the empty state, the setup flow, the product tour, the "what do I do now" gap. Reach for it when activation is weak, when new users drop off before reaching value, or when your product has empty states that say "no items yet" and stop there.
+`/impeccable onboard` is for the moments that decide whether a new user sticks around: the first screen, the empty state, the setup flow, the product tour, the "what do I do now" gap. Reach for it when activation is weak, when new users drop off before reaching value, or when your product has empty states that say "no items yet" and stop there.
 
 ## How it works
 
-The skill starts from one question: what is the aha moment, and how fast can a new user get there. Every design decision points at that moment.
+The command starts from one question: what is the aha moment, and how fast can a new user get there. Every design decision points at that moment.
 
 It works across the surfaces that shape first impressions:
 
@@ -18,12 +18,12 @@ It works across the surfaces that shape first impressions:
 4. **Progressive disclosure**: advanced features stay out of the way until they are earned.
 5. **Activation events**: the moment a user first experiences the core value is instrumented and celebrated, quietly.
 
-The skill resists two common failure modes: over-tutorialized onboarding where users click through a carousel before they can touch anything, and zero-onboarding where users are dropped into an empty app and expected to figure it out.
+The command resists two common failure modes: over-tutorialized onboarding where users click through a carousel before they can touch anything, and zero-onboarding where users are dropped into an empty app and expected to figure it out.
 
 ## Try it
 
 ```
-/onboard the editor
+/impeccable onboard the editor
 ```
 
 Typical output:
@@ -36,5 +36,5 @@ Typical output:
 ## Pitfalls
 
 - **Adding a product tour as the default answer.** Most products do not need a tour. They need a better first screen. Tours are a crutch.
-- **Designing onboarding without defining the aha moment.** If you cannot say in one sentence what the user should feel in the first 60 seconds, go back to `/shape` first.
+- **Designing onboarding without defining the aha moment.** If you cannot say in one sentence what the user should feel in the first 60 seconds, go back to `/impeccable shape` first.
 - **Running onboard on a broken flow.** Fix the flow first. Onboarding cannot rescue a product where the core action is broken.
