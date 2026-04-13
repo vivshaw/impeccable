@@ -4,28 +4,33 @@ Launch interactive live variant mode: select elements in the browser, pick a des
 
 - A running development server with hot module replacement (Vite, Next.js, Bun, etc.), OR a static HTML file open in the browser
 
-## Start the Server
+## Start Live Mode (one command)
 
-1. Read `.impeccable.md` if it exists. Keep the design context in mind for variant generation.
-2. Start the live variant server in the background. The `--background` flag spawns a detached server process, waits for it to be ready, prints the connection JSON to stdout, and exits:
-   ```bash
-   node {{scripts_path}}/live-server.mjs --background
-   ```
-   The output JSON contains `port` and `token`. Use the port for the script tag below.
-
-## Inject the Browser Script
-
-The `live-inject.mjs` script handles insertion deterministically. It reads `config.json` from its own directory (one-time per-project setup).
-
-### Step 1: Ensure config.json exists
+The `live.mjs` entry point does everything in a single call: checks config, starts (or reuses) the server, injects the script tag, loads `.impeccable.md` context.
 
 ```bash
-node {{scripts_path}}/live-inject.mjs --check
+node {{scripts_path}}/live.mjs
 ```
 
-If the output says `{"ok": true, ...}`, skip to Step 2.
+### Happy path
 
-If the output says `{"ok": false, "error": "config_missing", "path": "..."}`, you need to create the config **once**. Look at the project structure and package.json to determine:
+Output JSON:
+```json
+{
+  "ok": true,
+  "serverPort": 8400,
+  "serverToken": "...",
+  "pageFile": "public/index.html",
+  "hasContext": true,
+  "context": "...full .impeccable.md contents..."
+}
+```
+
+Keep the `context` in mind for variant generation. If browser automation tools are available, navigate to the page so the user can see it. Then proceed directly to the poll loop — no other setup steps needed.
+
+### First-time setup (config missing)
+
+If `live.mjs` outputs `{"ok": false, "error": "config_missing", "configPath": "..."}`, this project has never used live mode before. Create the config at the reported path based on the project's framework:
 
 | Framework | `file` | `insertBefore` | `commentSyntax` |
 |-----------|--------|----------------|-----------------|
@@ -38,7 +43,7 @@ If the output says `{"ok": false, "error": "config_missing", "path": "..."}`, yo
 | Astro | the root layout `.astro` file | `</body>` | `html` |
 | Static site with a non-root HTML file | e.g. `public/index.html` | `</body>` | `html` |
 
-Write the config to the path reported by `--check`. Example for this project:
+Use `insertAfter` instead of `insertBefore` if the anchor should be matched **after** a specific line. Example:
 
 ```json
 {
@@ -48,17 +53,7 @@ Write the config to the path reported by `--check`. Example for this project:
 }
 ```
 
-Use `insertAfter` instead of `insertBefore` if the anchor should be matched **after** a specific line (e.g. just after the main app script).
-
-### Step 2: Insert the live tag
-
-```bash
-node {{scripts_path}}/live-inject.mjs --port PORT
-```
-
-Use the `port` from the live-server startup output. The script writes the tag idempotently: if a stale tag is present, it's replaced with one pointing at the new port. Save is automatic.
-
-If browser automation tools are available, also navigate to the page so the user can see it.
+Then re-run `node {{scripts_path}}/live.mjs` to proceed.
 
 ## Enter the Poll Loop
 
