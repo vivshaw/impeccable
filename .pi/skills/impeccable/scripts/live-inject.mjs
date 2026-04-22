@@ -138,14 +138,23 @@ function buildTagBlock(syntax, port) {
   const open = commentOpen(syntax);
   const close = commentClose(syntax);
   // Inline pre-restore: runs before the external live.js is fetched. Sets
-  // scrollRestoration='manual' and jumps to the saved scrollY *synchronously*
+  // scrollRestoration='manual' and jumps to the saved scrollY synchronously
   // during HTML parse, beating the browser's animated reload-restore.
+  //
+  // Retries on fonts.ready and load are essential: scrollTo(y) clamps to
+  // the document's current scrollHeight, which is often hundreds of
+  // pixels short of the final value until async-loaded fonts swap in.
   // Hardcoded key matches live-browser.js: PREFIX ('impeccable-live') +
   // LS_KEY suffix ('-session') + SCROLL_KEY_SUFFIX ('-scroll').
   const preRestore =
     '<script>(function(){try{history.scrollRestoration="manual";' +
     'var y=parseFloat(localStorage.getItem("impeccable-live-session-scroll"));' +
-    'if(isFinite(y))window.scrollTo(0,y);}catch(e){}})();</script>';
+    'if(!isFinite(y))return;' +
+    'var apply=function(){if(Math.abs(window.scrollY-y)>0.5)window.scrollTo(0,y);};' +
+    'apply();' +
+    'if(document.fonts&&document.fonts.ready)document.fonts.ready.then(apply);' +
+    'window.addEventListener("load",apply,{once:true});' +
+    '}catch(e){}})();</script>';
   return (
     open + ' ' + MARKER_OPEN_TEXT + ' ' + close + '\n' +
     preRestore + '\n' +
