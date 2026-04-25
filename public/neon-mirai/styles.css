@@ -305,6 +305,8 @@ section[id] {
 
 .vertical-poem span {
   writing-mode: vertical-rl;
+  line-height: 1.18;
+  text-orientation: mixed;
   animation: ink-settle 900ms var(--ease) 260ms both;
 }
 
@@ -329,17 +331,6 @@ section[id] {
   z-index: 4;
   width: min(50rem, calc(100% - 2rem));
   padding: clamp(2.6rem, 4.6vw, 4.2rem) 0 0 clamp(5.8rem, 9vw, 8rem);
-}
-
-.kicker {
-  position: absolute;
-  left: clamp(2.1rem, 3.3vw, 3.2rem);
-  top: clamp(0.8rem, 1.4vw, 1.3rem);
-  margin: 0;
-  color: var(--ink-soft);
-  font-family: var(--font-serif);
-  font-size: 1rem;
-  writing-mode: vertical-rl;
 }
 
 .hero h1 {
@@ -1094,9 +1085,10 @@ section[id] {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 43%;
+  object-position: center 48%;
   mix-blend-mode: multiply;
-  transform: scale(1.075);
+  filter: saturate(1.02) contrast(1.02);
+  transform: scale(1.015);
   transform-origin: center;
 }
 
@@ -1736,16 +1728,6 @@ section[id] {
   .speaker-carousel[data-reveal] {
     --reveal-x: 0rem;
     --reveal-scale: 1;
-  }
-
-  .kicker {
-    position: static;
-    display: block;
-    max-width: 100%;
-    margin-bottom: 1.5rem;
-    writing-mode: horizontal-tb;
-    line-break: strict;
-    overflow-wrap: anywhere;
   }
 
   .hero h1 {
